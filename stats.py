@@ -42,12 +42,14 @@ class WebStats(object):
             'Bot',
         },
         ac_keywords = {
-            'Uni',
-            'Lab',
-            'Instit',
-            'Bio',
-            'Sci',
-            'Geno',
+            'uni',
+            'lab',
+            'instit',
+            'bio',
+            'sci',
+            'geno',
+            'forschung',
+            'hospital',
         },
         only_ac = False,
     ):
@@ -336,12 +338,11 @@ class WebStats(object):
                 if not n1:
                     continue
 
-                if any(b in n1 for b in kws):
+                if any(b in n1 or b in n1.lower() for b in kws):
 
                     return True
 
         return False
-
 
     def remove_bots(self):
 
