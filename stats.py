@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
 #
-# Processes nginx logfiles and extracts basic statistics.
-#
-# (c) 2016-2021 Dénes Türei, turei.denes@gmail.com
+# (c) 2016-2023 Dénes Türei, turei.denes@gmail.com
 # License: MIT (Expat) License
 #
+
+"""
+Process nginx logfiles and extract basic statistics.
+"""
 
 import ipwhois
 import os
@@ -49,6 +51,27 @@ class WebStats(object):
         },
         only_ac = False,
     ):
+        """
+        Process nginx logfiles and extract basic statistics.
+
+        Args:
+            logdir:
+                Look up Nginx logfiles from this directory.
+            domain_filter:
+                A function with value corresponding to False or True for
+                domains to be excluded or included, respectively.
+            logfiles_domain:
+                From ``logdir`` use only the log files that belong to this
+                domain.
+            bot_keywords:
+                Keywords to identify crawlers and other bots. Log entries
+                from bots will be removed.
+            ac_keywords:
+                Keywords to identify academic institutions.
+            only_ac:
+                Create statistics only from log entries that belong to
+                academic institutions, as identified based on ``ac_keywords``.
+        """
 
         self.logdir = logdir
         self.domain_filter = domain_filter
@@ -203,7 +226,8 @@ class WebStats(object):
 
     def names(self, data, unique = False):
         """
-        Returns counts per organization/network name.
+        Counts per organization/network name.
+
         E.g. one name is `GoogleBot`, another is `Cambridge University`, etc.
 
         :param bool unique: Count only once repeated IPs.
