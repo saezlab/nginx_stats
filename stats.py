@@ -127,7 +127,7 @@ class WebStats(object):
 
             _ = f.write(
                 '\n'.join(
-                    '%s\t%u' % i,
+                    '%s\t%u' % i
                     for i in rev_sorted
                 )
             )
