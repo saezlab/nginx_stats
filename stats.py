@@ -98,6 +98,7 @@ class WebStats(object):
         self.logfiles_lookup()
         self.read_logfiles()
         self.collect_whois()
+        self.remove_failed()
         self.select_ac()
         self.remove_bots()
         self.stats()
@@ -323,6 +324,11 @@ class WebStats(object):
                     )
                 )
             )
+
+
+    def remove_failed(self):
+
+        self.data = [d for d in self.data if '_whois_done' in d]
 
 
     @staticmethod
