@@ -42,7 +42,7 @@ class WebStats(object):
             'Bot',
         },
         ac_keywords = {
-            'uni',
+            'univ',
             'lab',
             'instit',
             'bio',
@@ -101,6 +101,7 @@ class WebStats(object):
         self.remove_failed()
         self.select_ac()
         self.remove_bots()
+        self.sort_by_date()
         self.stats()
         self.export()
 
@@ -401,3 +402,8 @@ class WebStats(object):
         with open(self.whois_cachefile, 'wb') as fp:
 
             pickle.dump((self.WHOIS_CACHE, self.WHOIS_FAILED), fp)
+
+
+    def sort_by_date(self):
+
+        self.data = sorted(self.data, key = lambda x: x.get('time'))
