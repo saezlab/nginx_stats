@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "nginx-stats"
+version = "0.1.0"
+description = "Process visitor statistics from nginx logs"
+authors = ["deeenes <turei.denes@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+ipwhois = "^1.2.0"
+pycountry = "^24.6.1"
+python-dateutil = "^2.9.0.post0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
