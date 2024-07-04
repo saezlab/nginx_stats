@@ -14,11 +14,10 @@ import os
 import dateutil.parser
 import itertools
 import sys
-import imp
+import importlib as imp
 import collections
 import pycountry
 import pickle
-from future.utils import iteritems
 
 
 class WebStats(object):
@@ -33,6 +32,7 @@ class WebStats(object):
         logdir,
         domain_filter = lambda x: x,
         logfiles_domain = None,
+        outdir = None,
         bot_keywords = {
             'Microsoft',
             'Facebook',
@@ -51,7 +51,6 @@ class WebStats(object):
             'forschung',
             'hospital',
         },
-        only_ac = False,
     ):
         """
         Process nginx logfiles and extract basic statistics.
@@ -70,17 +69,14 @@ class WebStats(object):
                 from bots will be removed.
             ac_keywords:
                 Keywords to identify academic institutions.
-            only_ac:
-                Create statistics only from log entries that belong to
-                academic institutions, as identified based on ``ac_keywords``.
         """
 
         self.logdir = logdir
+        self.outdir = outdir or f'{self.logdir}-stats'
         self.domain_filter = domain_filter
         self.logfiles_domain = logfiles_domain
         self.bot_keywords = bot_keywords
         self.ac_keywords  = ac_keywords
-        self.only_ac = only_ac
 
 
     def reload(self):
@@ -99,11 +95,15 @@ class WebStats(object):
         self.read_logfiles()
         self.collect_whois()
         self.remove_failed()
-        self.select_ac()
-        self.remove_bots()
         self.sort_by_date()
         self.stats()
-        self.export()
+        self.export('full')
+        self.remove_bots()
+        self.stats()
+        self.export('bots-removed')
+        self.select_ac()
+        self.stats()
+        self.export('ac-only')
 
 
     def read_whois_cache(self):
@@ -122,7 +122,7 @@ class WebStats(object):
 
         rev_sorted = reversed(
             sorted(
-                iteritems(cntr),
+                cntr.items(),
                 key = lambda i: i[1]
             )
         )
@@ -362,13 +362,11 @@ class WebStats(object):
 
     def select_ac(self):
 
-        if self.only_ac:
+        def is_ac(n):
 
-            def is_ac(n):
+            return self.inspect_name(n, self.ac_keywords)
 
-                return self.inspect_name(n, self.ac_keywords)
-
-            self.data = [d for d in self.data if is_ac(d['names'])]
+        self.data = [d for d in self.data if is_ac(d['names'])]
 
 
     def collect_whois(self):
@@ -388,16 +386,20 @@ class WebStats(object):
 
     def stats(self):
 
-        self.visitors_countries = self.countries(self.data)
-        self.visitors_names = self.names(self.data)
-        self.visitors_names_unique = self.names(self.data, unique = True)
+        self.visitors_by_country = self.countries(self.data)
+        self.visitors_by_name = self.names(self.data)
+        self.visitors_by_name_unique = self.names(self.data, unique = True)
 
 
-    def export(self):
+    def export(self, label: str = 'full'):
 
-        self.output_toplist('visitors_by_name', self.visitors_names)
-        self.output_toplist('visitors_by_name_unique', self.visitors_names_unique)
-        self.output_toplist('visitors_by_country', self.visitors_countries)
+        os.makedirs(self.outdir, exist_ok = True)
+
+        for by in ('name', 'name_unique', 'country'):
+
+            attr = f'visitors_by_{by}'
+            fname = os.path.join(self.outdir, f'{attr}__{label}')
+            self.output_toplist(fname, getattr(self, attr))
 
         with open(self.whois_cachefile, 'wb') as fp:
 
